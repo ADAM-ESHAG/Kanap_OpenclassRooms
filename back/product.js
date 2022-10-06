@@ -6,8 +6,8 @@ fetch(`http://localhost:3000/api/products/${productId}`).then((response) =>
     console.log(data);
     // *******Insertion des éléments HTML******
     // Insertion d'image
-    let itemImage = document.querySelector(".item__img");
-    itemImage.innerHTML = `<img src=${data.imageUrl} alt=${data.altTxt} />`;
+    let imageItem = document.querySelector(".item__img");
+    imageItem.innerHTML = `<img src=${data.imageUrl} alt=${data.altTxt} />`;
     // Insertion du nom
     let title = document.querySelector("#title");
     title.innerHTML = `${data.name}`;
@@ -35,10 +35,10 @@ fetch(`http://localhost:3000/api/products/${productId}`).then((response) =>
     //*********LocalStorage*******
     let btnAddProduct = document.querySelector("#addToCart");
     btnAddProduct.addEventListener("click", () => {
-      let titleValue = title.innerHTML; // Recupérer le nom du produit choisi
-      let colorValue = colors.value; //Récuperer la couleur choisie
-      let quantityValue = document.querySelector("#quantity").value; //Récuperer la quantité
-      let productPriceValue = price.innerHTML * quantityValue; // Recupération du prix
+      let titleValue = title.innerHTML; // Récupération du nom du produit choisi
+      let imageItemValue = imageItem.innerHTML; // Récupération d'image
+      let colorValue = colors.value; //Récupération de couleur choisie
+      let quantityValue = document.querySelector("#quantity").value; //Récupération de quantité
 
       // Vérifier que la coleur et la quantité sont bien saisi
       if (colorValue.length >= 15) {
@@ -51,10 +51,10 @@ fetch(`http://localhost:3000/api/products/${productId}`).then((response) =>
         // Création de produit choisi
         let choiceProduct = {
           nameOfProduct: titleValue,
+          imageOfProduct: imageItemValue,
           idOfProduct: productId,
           colorsOfProduct: colorValue,
           quantityOfProduct: Number(quantityValue),
-          priceOfProduct: Number(productPriceValue),
         };
 
         // Recupérer le panier si elle est dans le localStorage et le convertir en format JAVASCRIPT
@@ -74,8 +74,8 @@ fetch(`http://localhost:3000/api/products/${productId}`).then((response) =>
           /******* Si l'ID + la Couleur de produit cliqué et du produit enregistré sont Identique,
           alors adition leur quantité *******/
           if (getProductInLocalstorage) {
-            getProductInLocalstorage.quantityOfProduct += choiceProduct.quantityOfProduct;
-            getProductInLocalstorage.priceOfProduct += choiceProduct.priceOfProduct;
+            getProductInLocalstorage.quantityOfProduct +=
+              choiceProduct.quantityOfProduct;
             localStorage.setItem(
               "tabBasket",
               JSON.stringify(productInLocalstorage)
