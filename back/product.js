@@ -43,7 +43,7 @@ fetch(`http://localhost:3000/api/products/${productId}`).then((response) =>
       // Vérifier que la coleur et la quantité sont bien saisi
       if (colorValue.length >= 15) {
         alert("Veuillez choisir votre coleur"); // Alert
-      } else if (quantityValue == 0 || quantityValue > 100) {
+      } else if (quantityValue < 1 || quantityValue > 100) {
         alert("Veuillez choisir une quantité entre 1 et 100");
       }
       //la couleur et la quantité sont valides, alors

@@ -111,21 +111,23 @@ if (productInLocalstorage === null) {
             let dataColor = quantity.closest(".cart__item").getAttribute("data-color");
             // --- Déclaration de variable newQuantity
             let newQuantity = Number(quantity.value);
-            // **** Parcourir le tableau dans le LocalStorage ****
-            for (let k = 0; k < productInLocalstorage.length; k++) {
-              let storageId = productInLocalstorage[k].idOfProduct;
-              let storageColor = productInLocalstorage[k].colorsOfProduct;
-              /**** Si l'id et la couleur de produit dans le LocalStorage et celui de input en écoute sont identique ? 
+            if(newQuantity > 0 && newQuantity <= 100){
+              // **** Parcourir le tableau dans le LocalStorage ****
+              for (let k = 0; k < productInLocalstorage.length; k++) {
+                let storageId = productInLocalstorage[k].idOfProduct;
+                let storageColor = productInLocalstorage[k].colorsOfProduct;
+                /**** Si l'id et la couleur de produit dans le LocalStorage et celui de input en écoute sont identique ? 
                Alors on change le quantité de produit localStorage ****/
-              if (storageId === dataId && storageColor === dataColor) {
-                productInLocalstorage[k].quantityOfProduct = newQuantity;
+                if (storageId === dataId && storageColor === dataColor) {
+                  productInLocalstorage[k].quantityOfProduct = newQuantity;
+                }
               }
+              // *** Mise à jour de LocalStorage ****
+              localStorage.setItem(
+                "tabBasket",
+                JSON.stringify(productInLocalstorage)
+              );
             }
-            // *** Mise à jour de LocalStorage **** 
-            localStorage.setItem(
-              "tabBasket",
-              JSON.stringify(productInLocalstorage)
-            );
           });
         }
       }
@@ -139,7 +141,7 @@ if (productInLocalstorage === null) {
          
           del.addEventListener('click', () => {
             
-            // ----Cibler les parent de l'input en écoute pour récupérer son attribute data-id et data-color----
+            // ----Cibler les parent de l'element en écoute pour récupérer leur attribute data-id et data-color----
             let dataId = del
               .closest(".cart__item")
               .getAttribute("data-id");
@@ -151,10 +153,10 @@ if (productInLocalstorage === null) {
             for (let k = 0; k < productInLocalstorage.length; k++) {
               let storageId = productInLocalstorage[k].idOfProduct;
               let storageColor = productInLocalstorage[k].colorsOfProduct;
-              /**** Si l'id et la couleur de produit dans le LocalStorage et celui de input en écoute sont identique ? 
-               Alors on change le quantité de produit localStorage ****/
+              /**** Si l'id et la couleur de produit dans le LocalStorage et celui de parents de l'element en écoute sont identique ? 
+               Alors on suprime l'element et ses parents de localStorage ****/
               if (storageId === dataId && storageColor === dataColor) {
-                 delete(productInLocalstorage[k]);
+                 productInLocalstorage.splice(k);
               }
             }
             // *** Mise à jour de LocalStorage ****
@@ -162,8 +164,13 @@ if (productInLocalstorage === null) {
               "tabBasket",
               JSON.stringify(productInLocalstorage)
             );
+            // ---Si LocalStorage est vide alor surprime le tableau (tabBasket)
+            if(productInLocalstorage.length == 0){
+              localStorage.removeItem("tabBasket");
+            }
           });
         }
+         return;
       }
       deletProduct();
 
