@@ -97,6 +97,41 @@ if (productInLocalstorage === null) {
         paraDelet.textContent = "Suprimer";
         paraDelet.classList.add("deleteItem");
         divItemContentSettingsDelet.appendChild(paraDelet);
+
+        /*********************Partie formulaire****************/
+        // -----Injection du HTML -----
+        let divCartOrder = document.querySelector(".cart__order");
+        let formHTML = `<form method="get" class="cart__order__form">
+                <div class="cart__order__form__question">
+                  <label for="firstName">Prénom: </label>
+                  <input type="text" name="firstName" id="firstName" required />
+                  <p id="firstNameErrorMsg"></p>
+                </div>
+                <div class="cart__order__form__question">
+                  <label for="lastName">Nom: </label>
+                  <input type="text" name="lastName" id="lastName" required />
+                  <p id="lastNameErrorMsg"></p>
+                </div>
+                <div class="cart__order__form__question">
+                  <label for="address">Adresse: </label>
+                  <input type="text" name="address" id="address" required />
+                  <p id="addressErrorMsg"></p>
+                </div>
+                <div class="cart__order__form__question">
+                  <label for="city">Ville: </label>
+                  <input type="text" name="city" id="city" required />
+                  <p id="cityErrorMsg"></p>
+                </div>
+                <div class="cart__order__form__question">
+                  <label for="email">Email: </label>
+                  <input type="email" name="email" id="email" required />
+                  <p id="emailErrorMsg"></p>
+                </div>
+                <div class="cart__order__form__submit">
+                  <input type="submit" value="Commander !" id="order" />
+                </div>
+              </form>`;
+        divCartOrder.innerHTML = formHTML;
       }
 
       //------------------Function modification de quantité -----------------
@@ -107,11 +142,15 @@ if (productInLocalstorage === null) {
           // ---- Ecoute l'input ----
           quantity.addEventListener("change", () => {
             // ----Cibler les parent de l'input en écoute pour récupérer son attribute data-id et data-color----
-            let dataId = quantity.closest(".cart__item").getAttribute("data-id");
-            let dataColor = quantity.closest(".cart__item").getAttribute("data-color");
+            let dataId = quantity
+              .closest(".cart__item")
+              .getAttribute("data-id");
+            let dataColor = quantity
+              .closest(".cart__item")
+              .getAttribute("data-color");
             // --- Déclaration de variable newQuantity
             let newQuantity = Number(quantity.value);
-            if(newQuantity > 0 && newQuantity <= 100){
+            if (newQuantity > 0 && newQuantity <= 100) {
               // **** Parcourir le tableau dans le LocalStorage ****
               for (let k = 0; k < productInLocalstorage.length; k++) {
                 let storageId = productInLocalstorage[k].idOfProduct;
@@ -132,23 +171,19 @@ if (productInLocalstorage === null) {
         }
       }
       upDateNewQuantity();
-      
+
       /******** Function Suprission de produit *******/
-      function deletProduct(){
+      function deletProduct() {
         let deletArticle = document.querySelectorAll(".deleteItem");
         console.log(deletArticle);
-        for(let del of deletArticle){
-         
-          del.addEventListener('click', () => {
-            
+        for (let del of deletArticle) {
+          del.addEventListener("click", () => {
             // ----Cibler les parent de l'element en écoute pour récupérer leur attribute data-id et data-color----
-            let dataId = del
-              .closest(".cart__item")
-              .getAttribute("data-id");
+            let dataId = del.closest(".cart__item").getAttribute("data-id");
             let dataColor = del
               .closest(".cart__item")
               .getAttribute("data-color");
-              console.log(dataId);
+            console.log(dataId);
             // **** Parcourir le LocalStorage ****
             for (let k = 0; k < productInLocalstorage.length; k++) {
               let storageId = productInLocalstorage[k].idOfProduct;
@@ -156,7 +191,7 @@ if (productInLocalstorage === null) {
               /**** Si l'id et la couleur de produit dans le LocalStorage et celui de parents de l'element en écoute sont identique ? 
                Alors on suprime l'element et ses parents de localStorage ****/
               if (storageId === dataId && storageColor === dataColor) {
-                 productInLocalstorage.splice(k);
+                productInLocalstorage.splice(k);
               }
             }
             // *** Mise à jour de LocalStorage ****
@@ -165,12 +200,12 @@ if (productInLocalstorage === null) {
               JSON.stringify(productInLocalstorage)
             );
             // ---Si LocalStorage est vide alor surprime le tableau (tabBasket)
-            if(productInLocalstorage.length == 0){
+            if (productInLocalstorage.length == 0) {
               localStorage.removeItem("tabBasket");
             }
           });
         }
-         return;
+        return;
       }
       deletProduct();
 
@@ -197,6 +232,127 @@ if (productInLocalstorage === null) {
               </p>`;
       }
       getTotalArticlePrice();
+
+      /**************Gestionne de validation formulaire *********/
+      let form = document.querySelector(".cart__order__form");
+      
+      //-----------Ecouter la modification du prénom---------------
+      form.firstName.addEventListener("change", function(){
+        yourFirstName(this);
+      });
+      // ----------Function Vérification du prénom-----------
+      const yourFirstName = function(firstname){
+        // Création de reg exp pour valider le prénom
+        let firstNameRegExp = new RegExp(/^[a-zA-Z]{3,15}$/);
+        
+        // On test le prénom entrée
+        let testFirstName = firstNameRegExp.test(firstname.value);
+        
+        // On cible l'element qui vient just après
+        let messageFirstName = firstname.nextElementSibling;
+
+        // Si le test du prénom est valide
+        if(testFirstName){
+          // Envoie ce message
+          messageFirstName.textContent = 'Prénom valide';
+        } else {
+          // Envoie ceci
+          messageFirstName.textContent = 'Prénom non valide';
+        }
+      }
+      
+      // --------Ecoute la modification du nom
+      form.lastName.addEventListener("change", function(){
+        yourLastName(this);
+      });
+      // -----Function verification du nom----------
+      const yourLastName = function(lastname){
+        // Création de RegExp pour valider le nom
+        let lastNameRegExp = new RegExp(/^[a-zA-Z\s-]{3,15}$/);
+        // On test le nom entrée
+        let testLastName = lastNameRegExp.test(lastname.value);
+        // On cible l'element qui vient just après
+        let messageLastName = lastname.nextElementSibling;
+        // Si le test du nom est valide
+        if (testLastName) {
+          // Envoie ce message
+          messageLastName.textContent = "Nom valide";
+        } else {
+          // Envoie ceci
+          messageLastName.textContent =
+            "Nom non valide";
+        }
+      }
+      
+      // --------Ecoute la modification de l'adresse
+      form.address.addEventListener("change", function(){
+        yourAdress(this);
+      });
+      // Function vérification d'adresse
+      const yourAdress = function(adress){
+        // Création de RegExp de l'adresse
+        let adressRegExp = new RegExp(/^[a-zA-Z0-9\s-]{10,30}$/);
+        // On test l'adresse entrée
+        let testAdress = adressRegExp.test(adress.value);
+        // On cible l'element qui suive l'input adress
+        let messageAdress = adress.nextElementSibling;
+        // Si l'adresse est valide
+        if(testAdress){
+          messageAdress.textContent = "Adresse valide";
+        } else {
+          messageAdress.textContent = "Adresse non valide";
+        }
+      }
+
+      // -------Ecoute la modification de ville
+      form.city.addEventListener("change", function(){
+        yourCity(this);
+      });
+      // ---------Function vérification de ville
+      const yourCity = function(city){
+        // Création de RegExp de la ville
+        let cityRegExp = new RegExp(/^[a-zA-Z0-9\s-]{3,20}$/);
+        // On test la ville entrée
+        let testCity = cityRegExp.test(city.value);
+        // On cible l'element qui suis l'input ville
+        let messageCity = city.nextElementSibling;
+        // On vérifie si la ville saisis est bonne
+        if(testCity){
+          // Renvoie ce message
+          messageCity.textContent = "Ville valide";
+        }else {
+          // Renvoie ceci
+          messageCity.textContent = "Ville non valide";
+        }
+      }
+
+      // ---------Ecoute la modification de l'email--------
+      form.email.addEventListener("change", function(){
+        yourEmail(this);
+      });
+      // ---------Function vérification du mail
+      const yourEmail = function(email){
+        // Création de RegExp du mail
+        let emailExgExp = new RegExp(
+          "^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$",
+          "g"
+        );
+        // On test l'email entreé
+        let testEmail = emailExgExp.test(email.value);
+        // On cible l'element qui suis l'input email
+        let messageEmail = email.nextElementSibling;
+        // On vérifie si l'email entrée est bonne
+        if(testEmail){
+          // Affiche ce message
+          messageEmail.textContent = "Email valide";
+        }
+        else {
+          // Affiche ceci
+          messageEmail.textContent = "Email non valide";
+        }
+      }
+
+
     })
   );
 
