@@ -3,7 +3,6 @@ const productId = search_params.get("id");
 // Afficher le produit cliqué à partir de la page d'accueil
 fetch(`http://localhost:3000/api/products/${productId}`).then((response) =>
   response.json().then((data) => {
-    console.log(data);
     // *******Insertion des éléments HTML******
     // Insertion d'image
     let imageItem = document.querySelector(".item__img");

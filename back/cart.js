@@ -1,6 +1,5 @@
 // Recupérer le panier si elle est dans le localStorage et le convertir en format JAVASCRIPT
 let productInLocalstorage = JSON.parse(localStorage.getItem("tabBasket"));
-console.log(productInLocalstorage);
 
 let sectionCart = document.querySelector("#cart__items");
 if (productInLocalstorage === null) {
@@ -13,7 +12,6 @@ if (productInLocalstorage === null) {
   fetch(url).then((response) =>
     response.json().then((data) => {
       for (let i = 0; i < productInLocalstorage.length; i++) {
-        console.log(productInLocalstorage[i].idOfProduct);
         let sectionCartItems = document.querySelector("#cart__items");
         let articleCartItem = document.createElement("article");
         articleCartItem.setAttribute(
@@ -53,7 +51,6 @@ if (productInLocalstorage === null) {
         divItemContentDescription.appendChild(color);
         for (let product of data) {
           if (product._id === productInLocalstorage[i].idOfProduct) {
-            console.log(product.price);
             let price = document.createElement("p");
             price.textContent = `${product.price} €`;
             divItemContentDescription.appendChild(price);
@@ -175,7 +172,6 @@ if (productInLocalstorage === null) {
       /******** Function Suprission de produit *******/
       function deletProduct() {
         let deletArticle = document.querySelectorAll(".deleteItem");
-        console.log(deletArticle);
         for (let del of deletArticle) {
           del.addEventListener("click", () => {
             // ----Cibler les parent de l'element en écoute pour récupérer leur attribute data-id et data-color----
@@ -183,7 +179,7 @@ if (productInLocalstorage === null) {
             let dataColor = del
               .closest(".cart__item")
               .getAttribute("data-color");
-            console.log(dataId);
+           
             // **** Parcourir le LocalStorage ****
             for (let k = 0; k < productInLocalstorage.length; k++) {
               let storageId = productInLocalstorage[k].idOfProduct;
@@ -199,7 +195,7 @@ if (productInLocalstorage === null) {
               "tabBasket",
               JSON.stringify(productInLocalstorage)
             );
-            // ---Si LocalStorage est vide alor surprime le tableau (tabBasket)
+            // ---Si LocalStorage est vide alors surprime le tableau (tabBasket)
             if (productInLocalstorage.length == 0) {
               localStorage.removeItem("tabBasket");
             }
@@ -219,11 +215,10 @@ if (productInLocalstorage === null) {
             if (product._id === productInLocalstorage[i].idOfProduct) {
               totalPrice +=
                 productInLocalstorage[i].quantityOfProduct * product.price;
-              console.log(totalPrice);
             }
           }
         }
-        console.log(totalQuantity);
+        
         // Création de div CartPrice
         let divCartPrice = document.querySelector(".cart__price");
         divCartPrice.innerHTML = `<p>
@@ -351,6 +346,38 @@ if (productInLocalstorage === null) {
           messageEmail.textContent = "Email non valide";
         }
       }
+
+      // ------Ecoute bouton order
+      let order = document.querySelector("#order");
+      order.addEventListener('click', function(){
+        // Création d'un objet contact
+        const contact = {
+          firstName: document.querySelector("#firstName").value,
+          lastName: document.querySelector("#lastName").value,
+          address: document.querySelector("#address").value,
+          ville: document.querySelector("#city").value,
+          email: document.querySelector("#email").value,
+        };
+
+        // *****Envoie Les données contact au serveur avec Requete POST************
+        const contactData = fetch("http://localhost:3000/api/products", {
+          method: "POST",
+          body: JSON.stringify(contact),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        contactData.then(async (response) => {
+          try {
+            console.log(response);
+            const contenu = await response.json();
+            console.log(contenu);
+          } catch (e) {
+            console.log(e);
+          }
+        });
+      });
 
 
     })
