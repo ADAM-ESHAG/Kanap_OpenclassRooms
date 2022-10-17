@@ -125,7 +125,7 @@ if (productInLocalstorage === null) {
                   <p id="emailErrorMsg"></p>
                 </div>
                 <div class="cart__order__form__submit">
-                  <input type="submit" value="Commander !" id="order" />
+                  <input type="submit" value="Commander !" id="order" name='order'/>
                 </div>
               </form>`;
         divCartOrder.innerHTML = formHTML;
@@ -179,17 +179,19 @@ if (productInLocalstorage === null) {
             let dataColor = del
               .closest(".cart__item")
               .getAttribute("data-color");
-           
+
             // **** Parcourir le LocalStorage ****
             for (let k = 0; k < productInLocalstorage.length; k++) {
-              let storageId = productInLocalstorage[k].idOfProduct;
-              let storageColor = productInLocalstorage[k].colorsOfProduct;
               /**** Si l'id et la couleur de produit dans le LocalStorage et celui de parents de l'element en écoute sont identique ? 
                Alors on suprime l'element et ses parents de localStorage ****/
-              if (storageId === dataId && storageColor === dataColor) {
-                productInLocalstorage.splice(k);
+              if (
+                productInLocalstorage[k].idOfProduct === dataId &&
+                productInLocalstorage[k].colorsOfProduct === dataColor
+              ) {
+                productInLocalstorage.splice(k, 1);
               }
             }
+            
             // *** Mise à jour de LocalStorage ****
             localStorage.setItem(
               "tabBasket",
@@ -218,7 +220,7 @@ if (productInLocalstorage === null) {
             }
           }
         }
-        
+
         // Création de div CartPrice
         let divCartPrice = document.querySelector(".cart__price");
         divCartPrice.innerHTML = `<p>
@@ -230,158 +232,224 @@ if (productInLocalstorage === null) {
 
       /**************Gestionne de validation formulaire *********/
       let form = document.querySelector(".cart__order__form");
-      
-      //-----------Ecouter la modification du prénom---------------
-      form.firstName.addEventListener("change", function(){
-        yourFirstName(this);
-      });
-      // ----------Function Vérification du prénom-----------
-      const yourFirstName = function(firstname){
-        // Création de reg exp pour valider le prénom
-        let firstNameRegExp = new RegExp(/^[a-zA-Z]{3,15}$/);
-        
-        // On test le prénom entrée
-        let testFirstName = firstNameRegExp.test(firstname.value);
-        
-        // On cible l'element qui vient just après
-        let messageFirstName = firstname.nextElementSibling;
+      form.setAttribute("action", "confirmation.html");
 
-        // Si le test du prénom est valide
-        if(testFirstName){
-          // Envoie ce message
-          messageFirstName.textContent = 'Prénom valide';
-        } else {
-          // Envoie ceci
-          messageFirstName.textContent = 'Prénom non valide';
-        }
-      }
-      
+      //-----------Ecouter la modification du prénom---------------
+      form.firstName.addEventListener("change", function () {
+        valideFirstName(this);
+      });
+
       // --------Ecoute la modification du nom
-      form.lastName.addEventListener("change", function(){
-        yourLastName(this);
+      form.lastName.addEventListener("change", function () {
+        valideLastName(this);
       });
-      // -----Function verification du nom----------
-      const yourLastName = function(lastname){
-        // Création de RegExp pour valider le nom
-        let lastNameRegExp = new RegExp(/^[a-zA-Z\s-]{3,15}$/);
-        // On test le nom entrée
-        let testLastName = lastNameRegExp.test(lastname.value);
-        // On cible l'element qui vient just après
-        let messageLastName = lastname.nextElementSibling;
-        // Si le test du nom est valide
-        if (testLastName) {
-          // Envoie ce message
-          messageLastName.textContent = "Nom valide";
-        } else {
-          // Envoie ceci
-          messageLastName.textContent =
-            "Nom non valide";
-        }
-      }
-      
+
       // --------Ecoute la modification de l'adresse
-      form.address.addEventListener("change", function(){
-        yourAdress(this);
+      form.address.addEventListener("change", function () {
+        valideAdress(this);
       });
-      // Function vérification d'adresse
-      const yourAdress = function(adress){
-        // Création de RegExp de l'adresse
-        let adressRegExp = new RegExp(/^[a-zA-Z0-9\s-]{10,30}$/);
-        // On test l'adresse entrée
-        let testAdress = adressRegExp.test(adress.value);
-        // On cible l'element qui suive l'input adress
-        let messageAdress = adress.nextElementSibling;
-        // Si l'adresse est valide
-        if(testAdress){
-          messageAdress.textContent = "Adresse valide";
-        } else {
-          messageAdress.textContent = "Adresse non valide";
-        }
-      }
 
       // -------Ecoute la modification de ville
-      form.city.addEventListener("change", function(){
-        yourCity(this);
+      form.city.addEventListener("change", function () {
+        valideCity(this);
       });
+
+      // ---------Ecoute la modification de l'email--------
+      form.email.addEventListener("change", function () {
+        valideEmail(this);
+      });
+
+      //-----------Ecouter la modification du Soumission---------------
+      form.addEventListener("submit", function(event) {
+        event.preventDefault();
+        if (
+          valideFirstName(form.firstName) &&
+          valideLastName(form.lastName) &&
+          valideAdress(form.address) &&
+          valideCity(form.city) &&
+          valideEmail(form.email)
+        ) {
+          
+          let productId = [];
+          for (let product of productInLocalstorage) {
+            productId.push(product.idOfProduct);
+          }
+          // Création d'un objet contact
+          const form = {
+            'contact': {
+              'firstName': event.target.querySelector('input[name="firstName"]')
+                .value,
+              'lastName': event.target.querySelector('input[name="lastName"]')
+                .value,
+              'address': event.target.querySelector('input[name="address"]')
+                .value,
+              'city': event.target.querySelector('input[name="city"]').value,
+              'email': event.target.querySelector('input[name="email"]')
+                .value,
+            },
+            'products': productId,
+          };
+          console.log(form);
+          // *****Envoie Les données contact et products au serveur avec Requete POST************
+          fetch(`http://localhost:3000/api/products/order`, {
+            method: "POST",
+            body: JSON.stringify(form),
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            Cache: 'default'
+          }).then((response) => response.json().then((product) => {
+            let orderId = product.orderId;
+            if(orderId){
+              localStorage.clear();
+              window.location.href = `confirmation.html?commande=${orderId}`;
+            }else{
+              alert("Ressayer");
+            }
+          }));
+          
+        }
+        
+      });
+      
+
+      // ----------Function Vérification du prénom-----------
+      const valideFirstName = function (firstname) {
+        // Création de Reg exp pour valider le prénom
+        let firstNameRegExp = new RegExp(/^[a-zA-Z]{3,15}$/);
+        let firstNameValue = firstname.value;
+
+        // Récupération la paragraphe firstName message d'erreur
+        let firstNameErrorMsg = document.getElementById("firstNameErrorMsg");
+
+        // Si le test du prénom est valide
+        if (firstNameRegExp.test(firstNameValue)) {
+          // Envoie ce message
+          firstNameErrorMsg.textContent = "Prénom valide";
+          return true;
+        } else {
+          // Envoie ceci
+          firstNameErrorMsg.textContent = "Prénom non valide";
+          return false;
+        }
+      };
+      
+      // -----Function verification du nom----------
+      const valideLastName = function (lastname) {
+        // Création de RegExp pour valider le nom
+        let lastNameRegExp = new RegExp(/^[a-zA-Z\s-]{3,15}$/);
+
+        // Récupération de paragraphe lastName message d'erreur
+        let lastNameErrorMsg = lastname.nextElementSibling;
+        // Si le test du nom est valide
+        if (lastNameRegExp.test(lastname.value)) {
+          // Envoie ce message
+          lastNameErrorMsg.textContent = "Nom valide";
+          return true;
+        } else {
+          // Envoie ceci
+          lastNameErrorMsg.textContent = "Nom non valide";
+          return false;
+        }
+      };
+
+      // Function vérification d'adresse
+      const valideAdress = function (adress) {
+        // Création de RegExp de l'adresse
+        let adressRegExp = new RegExp(/^[a-zA-Z0-9\s-]{10,30}$/);
+
+        // Récupération de paragraphe adress message d'erreur
+        let addressErrorMsg = adress.nextElementSibling;
+        // Si l'adresse est valide
+        if (adressRegExp.test(adress.value)) {
+          addressErrorMsg.textContent = "Adresse valide";
+          return true;
+        } else {
+          addressErrorMsg.textContent = "Adresse non valide";
+          return false;
+        }
+      };
+
       // ---------Function vérification de ville
-      const yourCity = function(city){
+      const valideCity = function (city) {
         // Création de RegExp de la ville
         let cityRegExp = new RegExp(/^[a-zA-Z0-9\s-]{3,20}$/);
         // On test la ville entrée
-        let testCity = cityRegExp.test(city.value);
-        // On cible l'element qui suis l'input ville
-        let messageCity = city.nextElementSibling;
-        // On vérifie si la ville saisis est bonne
-        if(testCity){
-          // Renvoie ce message
-          messageCity.textContent = "Ville valide";
-        }else {
-          // Renvoie ceci
-          messageCity.textContent = "Ville non valide";
-        }
-      }
 
-      // ---------Ecoute la modification de l'email--------
-      form.email.addEventListener("change", function(){
-        yourEmail(this);
-      });
+        // Récupération de paragraphe city message d'erreur
+        let cityErrorMsg = city.nextElementSibling;
+
+        // On vérifie si la ville saisis est bonne
+        if (cityRegExp.test(city.value)) {
+          // Renvoie ce message
+          cityErrorMsg.textContent = "Ville valide";
+          return true;
+        } else {
+          // Renvoie ceci
+          cityErrorMsg.textContent = "Ville non valide";
+          return false;
+        }
+      };
+
       // ---------Function vérification du mail
-      const yourEmail = function(email){
+      const valideEmail = function (email) {
         // Création de RegExp du mail
-        let emailExgExp = new RegExp(
+        let emailRegExp = new RegExp(
           "^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$",
           "g"
         );
-        // On test l'email entreé
-        let testEmail = emailExgExp.test(email.value);
-        // On cible l'element qui suis l'input email
-        let messageEmail = email.nextElementSibling;
+
+        // Récupération de paragraphe email message d'erreur
+        let emailErrorMsg = email.nextElementSibling;
+
         // On vérifie si l'email entrée est bonne
-        if(testEmail){
+        if (emailRegExp.test(email.value)) {
           // Affiche ce message
-          messageEmail.textContent = "Email valide";
-        }
-        else {
+          emailErrorMsg.textContent = "Email valide";
+          return true;
+        } else {
           // Affiche ceci
-          messageEmail.textContent = "Email non valide";
+          emailErrorMsg.textContent = "Email non valide";
+          return false;
         }
-      }
-
-      // ------Ecoute bouton order
-      let order = document.querySelector("#order");
-      order.addEventListener('click', function(){
-        // Création d'un objet contact
-        const contact = {
-          firstName: document.querySelector("#firstName").value,
-          lastName: document.querySelector("#lastName").value,
-          address: document.querySelector("#address").value,
-          ville: document.querySelector("#city").value,
-          email: document.querySelector("#email").value,
-        };
-
-        // *****Envoie Les données contact au serveur avec Requete POST************
-        const contactData = fetch("http://localhost:3000/api/products", {
-          method: "POST",
-          body: JSON.stringify(contact),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        contactData.then(async (response) => {
-          try {
-            console.log(response);
-            const contenu = await response.json();
-            console.log(contenu);
-          } catch (e) {
-            console.log(e);
-          }
-        });
-      });
-
-
+      };
     })
   );
+
+  // ------Ecoute bouton order
+  // let order = document.querySelector("#order");
+  // if(order !== null){
+  //   order.addEventListener("click", () => {
+  //     // Création d'un objet contact
+  //     const contactData = {
+  //       firstName: document.querySelector("#firstName").value,
+  //       lastName: document.querySelector("#lastName").value,
+  //       address: document.querySelector("#address").value,
+  //       ville: document.querySelector("#city").value,
+  //       email: document.querySelector("#email").value,
+  //     };
+
+  //     // *****Envoie Les données contact au serveur avec Requete POST************
+  //     let response = fetch("http://localhost:3000/api/products/order", {
+  //       method: "POST",
+  //       body: JSON.stringify(contactData),
+  //       headers: {
+  //         "Content-Type": "application/json;charset=utf-8",
+  //       },
+  //     });
+
+  //     response.then(async (response) => {
+  //       try {
+  //         console.log(response);
+  //         const contenu = await response.json();
+  //         console.log(contenu);
+  //       } catch (e) {
+  //         console.log(e);
+  //       }
+  //     });
+  //   });
+  // }
 
   /*
   // Deuxième méthode
