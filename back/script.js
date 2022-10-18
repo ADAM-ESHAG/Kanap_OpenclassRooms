@@ -1,3 +1,4 @@
+/*********On fetch le URL pour récupérer et afficher la data **********/
 let url = "http://localhost:3000/api/products";
 fetch(url).then((response) =>
   response.json().then((data) => {

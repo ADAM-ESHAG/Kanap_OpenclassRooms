@@ -1,6 +1,8 @@
+/**************Search_params dans le URL de la page produit pour récupérer l'ID de produit *************/
 const search_params = new URLSearchParams(window.location.search);
 const productId = search_params.get("id");
-// Afficher le produit cliqué à partir de la page d'accueil
+
+//-------Afficher le produit cliqué à partir de la page d'accueil--------
 fetch(`http://localhost:3000/api/products/${productId}`).then((response) =>
   response.json().then((data) => {
     // *******Insertion des éléments HTML******

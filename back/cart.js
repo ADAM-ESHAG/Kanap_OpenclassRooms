@@ -3,8 +3,7 @@ let productInLocalstorage = JSON.parse(localStorage.getItem("tabBasket"));
 
 let sectionCart = document.querySelector("#cart__items");
 if (productInLocalstorage === null) {
-  let panierVide = `<h2>Votre panier est vide</h2>`;
-  sectionCart.innerHTML = panierVide;
+  window.location.href = `index.html`;
 } else {
   // Si le panier n'est pas vide
   // On fetch pour récupérer le prix du produit
@@ -191,7 +190,7 @@ if (productInLocalstorage === null) {
                 productInLocalstorage.splice(k, 1);
               }
             }
-            
+
             // *** Mise à jour de LocalStorage ****
             localStorage.setItem(
               "tabBasket",
@@ -221,7 +220,7 @@ if (productInLocalstorage === null) {
           }
         }
 
-        // Création de div CartPrice
+        // -------Création de div CartPrice-------
         let divCartPrice = document.querySelector(".cart__price");
         divCartPrice.innerHTML = `<p>
                 Total (<span id="totalQuantity">${totalQuantity}</span> articles) :
@@ -239,17 +238,17 @@ if (productInLocalstorage === null) {
         valideFirstName(this);
       });
 
-      // --------Ecoute la modification du nom
+      // --------Ecoute la modification du nom----------------
       form.lastName.addEventListener("change", function () {
         valideLastName(this);
       });
 
-      // --------Ecoute la modification de l'adresse
+      // --------Ecoute la modification de l'adresse---------
       form.address.addEventListener("change", function () {
         valideAdress(this);
       });
 
-      // -------Ecoute la modification de ville
+      // -------Ecoute la modification de ville-----------
       form.city.addEventListener("change", function () {
         valideCity(this);
       });
@@ -260,8 +259,10 @@ if (productInLocalstorage === null) {
       });
 
       //-----------Ecouter la modification du Soumission---------------
-      form.addEventListener("submit", function(event) {
+      form.addEventListener("submit", function (event) {
         event.preventDefault();
+
+        // --------Si ces conditions return true---------
         if (
           valideFirstName(form.firstName) &&
           valideLastName(form.lastName) &&
@@ -269,27 +270,28 @@ if (productInLocalstorage === null) {
           valideCity(form.city) &&
           valideEmail(form.email)
         ) {
-          
+          //--------Création d'un tableau productId----------
           let productId = [];
           for (let product of productInLocalstorage) {
+            //---------Push l'ID de produit dans le tableau productId----------
             productId.push(product.idOfProduct);
           }
-          // Création d'un objet contact
+
+          //-----------------Création d'un objet contact----------------
           const form = {
-            'contact': {
-              'firstName': event.target.querySelector('input[name="firstName"]')
+            contact: {
+              firstName: event.target.querySelector('input[name="firstName"]')
                 .value,
-              'lastName': event.target.querySelector('input[name="lastName"]')
+              lastName: event.target.querySelector('input[name="lastName"]')
                 .value,
-              'address': event.target.querySelector('input[name="address"]')
+              address: event.target.querySelector('input[name="address"]')
                 .value,
-              'city': event.target.querySelector('input[name="city"]').value,
-              'email': event.target.querySelector('input[name="email"]')
-                .value,
+              city: event.target.querySelector('input[name="city"]').value,
+              email: event.target.querySelector('input[name="email"]').value,
             },
-            'products': productId,
+            products: productId,
           };
-          console.log(form);
+
           // *****Envoie Les données contact et products au serveur avec Requete POST************
           fetch(`http://localhost:3000/api/products/order`, {
             method: "POST",
@@ -298,63 +300,68 @@ if (productInLocalstorage === null) {
               Accept: "application/json",
               "Content-Type": "application/json",
             },
-            Cache: 'default'
-          }).then((response) => response.json().then((product) => {
-            let orderId = product.orderId;
-            if(orderId){
-              localStorage.clear();
-              window.location.href = `confirmation.html?commande=${orderId}`;
-            }else{
-              alert("Ressayer");
-            }
-          }));
-          
+            Cache: "default",
+          })
+            //------Puis récupére la reponse---
+            .then((response) =>
+              // ----Ensuite le transformet en format JSON----------
+              response
+                .json()
+                //  ---Puis défini la reponse de API conmme product---------
+                .then((product) => {
+                  let orderId = product.orderId;
+                  if (orderId) {
+                    localStorage.clear();
+                    window.location.href = `confirmation.html?commande=${orderId}`;
+                  } else {
+                    alert("Ressayer");
+                  }
+                })
+            );
         }
-        
       });
-      
 
       // ----------Function Vérification du prénom-----------
       const valideFirstName = function (firstname) {
-        // Création de Reg exp pour valider le prénom
+        //--------Création de Reg exp pour valider le prénom----------
         let firstNameRegExp = new RegExp(/^[a-zA-Z]{3,15}$/);
         let firstNameValue = firstname.value;
 
-        // Récupération la paragraphe firstName message d'erreur
+        //-----------Récupération la paragraphe firstName message d'erreur---------
         let firstNameErrorMsg = document.getElementById("firstNameErrorMsg");
 
-        // Si le test du prénom est valide
+        //----------Si le test du prénom est valide---------
         if (firstNameRegExp.test(firstNameValue)) {
-          // Envoie ce message
+          //---------Envoie ce message--------
           firstNameErrorMsg.textContent = "Prénom valide";
           return true;
         } else {
-          // Envoie ceci
+          //----------Envoie ceci---------
           firstNameErrorMsg.textContent = "Prénom non valide";
           return false;
         }
       };
-      
+
       // -----Function verification du nom----------
       const valideLastName = function (lastname) {
-        // Création de RegExp pour valider le nom
+        //--------Création de RegExp pour valider le nom--------
         let lastNameRegExp = new RegExp(/^[a-zA-Z\s-]{3,15}$/);
 
-        // Récupération de paragraphe lastName message d'erreur
+        //---------Récupération de paragraphe lastName message d'erreur------
         let lastNameErrorMsg = lastname.nextElementSibling;
-        // Si le test du nom est valide
+        //-------Si le test du nom est valide-----
         if (lastNameRegExp.test(lastname.value)) {
-          // Envoie ce message
+          //-------Envoie ce message-------
           lastNameErrorMsg.textContent = "Nom valide";
           return true;
         } else {
-          // Envoie ceci
+          //---------Envoie ceci-------
           lastNameErrorMsg.textContent = "Nom non valide";
           return false;
         }
       };
 
-      // Function vérification d'adresse
+      //-------Function vérification d'adresse-------
       const valideAdress = function (adress) {
         // Création de RegExp de l'adresse
         let adressRegExp = new RegExp(/^[a-zA-Z0-9\s-]{10,30}$/);
@@ -417,39 +424,6 @@ if (productInLocalstorage === null) {
     })
   );
 
-  // ------Ecoute bouton order
-  // let order = document.querySelector("#order");
-  // if(order !== null){
-  //   order.addEventListener("click", () => {
-  //     // Création d'un objet contact
-  //     const contactData = {
-  //       firstName: document.querySelector("#firstName").value,
-  //       lastName: document.querySelector("#lastName").value,
-  //       address: document.querySelector("#address").value,
-  //       ville: document.querySelector("#city").value,
-  //       email: document.querySelector("#email").value,
-  //     };
-
-  //     // *****Envoie Les données contact au serveur avec Requete POST************
-  //     let response = fetch("http://localhost:3000/api/products/order", {
-  //       method: "POST",
-  //       body: JSON.stringify(contactData),
-  //       headers: {
-  //         "Content-Type": "application/json;charset=utf-8",
-  //       },
-  //     });
-
-  //     response.then(async (response) => {
-  //       try {
-  //         console.log(response);
-  //         const contenu = await response.json();
-  //         console.log(contenu);
-  //       } catch (e) {
-  //         console.log(e);
-  //       }
-  //     });
-  //   });
-  // }
 
   /*
   // Deuxième méthode
