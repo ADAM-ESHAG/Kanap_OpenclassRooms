@@ -3,13 +3,19 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
+  "homepage": "https://adam-eshag.github.io/Kanap_OpenclassRooms",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "predeploy": "npm run",
+    "deploy": "gh-pages -d build"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.4",
     "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "gh-pages": "^4.0.0"
   }
 }
